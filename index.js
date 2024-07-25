@@ -6,13 +6,6 @@ const express = require('express');
 
 const bot = new TelegramBot('7311671854:AAGU0ULdZ8zldqzLvEEX5hWxuqvlRj72NPU', { polling: true });
 
-bot.deleteWebhook()
-  .then(() => {
-    console.log('Webhook успешно удален');
-  })
-  .catch((err) => {
-    console.error('Ошибка при удалении webhook:', err);
-  });
 
 let users = {};
 
