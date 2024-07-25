@@ -1,8 +1,18 @@
 const { google } = require('googleapis');
 const TelegramBot = require('node-telegram-bot-api');
 const fs = require('fs');
+const axios = require('axios');
+const express = require('express');
 
 const bot = new TelegramBot('7311671854:AAGU0ULdZ8zldqzLvEEX5hWxuqvlRj72NPU', { polling: true });
+
+bot.deleteWebhook()
+  .then(() => {
+    console.log('Webhook успешно удален');
+  })
+  .catch((err) => {
+    console.error('Ошибка при удалении webhook:', err);
+  });
 
 let users = {};
 
@@ -105,6 +115,7 @@ bot.on('callback_query', (callbackQuery) => {
   }
 });
 
+// Сохранение ответов в Google Sheets
 async function saveToGoogleSheets(answers) {
   const auth = new google.auth.GoogleAuth({
     keyFile: 'credentials.json',
@@ -147,3 +158,22 @@ async function saveToGoogleSheets(answers) {
     console.error('Ошибка при сохранении в Google Sheets:', error);
   }
 }
+
+// Настройка вебхука
+const app = express();
+const port = process.env.PORT || 3000;
+
+app.use(express.json());
+
+const webhookUrl = 'https://hr-gtgoyy5aw-olzhasergalis-projects.vercel.app/api/telegram-bot';
+
+bot.setWebHook(webhookUrl);
+
+app.post('/api/telegram-bot', (req, res) => {
+  bot.processUpdate(req.body);
+  res.sendStatus(200);
+});
+
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
