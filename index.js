@@ -4,7 +4,7 @@ const fs = require('fs');
 const axios = require('axios');
 const express = require('express');
 
-const bot = new TelegramBot('7311671854:AAGU0ULdZ8zldqzLvEEX5hWxuqvlRj72NPU', { polling: true });
+const bot = new TelegramBot('6741457660:AAFaWvRJX0kj5UK2UggWWXdZBAO2eGC22nw', { polling: true });
 
 
 let users = {};
@@ -23,7 +23,6 @@ const questions = [
   { id: 'reason', text: 'Почему ты хочешь работать в Qazaq Republic?', kaz: 'Неге Qazaq Republic-та жұмыс істегің келеді?', type: 'text' }
 ];
 
-// Обработка команды /start
 bot.onText(/\/start/, (msg) => {
   const chatId = msg.chat.id;
   users[chatId] = { step: 0, answers: {} };
@@ -108,7 +107,6 @@ bot.on('callback_query', (callbackQuery) => {
   }
 });
 
-// Сохранение ответов в Google Sheets
 async function saveToGoogleSheets(answers) {
   const auth = new google.auth.GoogleAuth({
     keyFile: 'credentials.json',
@@ -152,13 +150,12 @@ async function saveToGoogleSheets(answers) {
   }
 }
 
-// Настройка вебхука
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
 
-const webhookUrl = 'https://hr-gtgoyy5aw-olzhasergalis-projects.vercel.app/api/telegram-bot';
+const webhookUrl = 'https://hr-bot-five.vercel.app/api/telegram-bot';
 
 bot.setWebHook(webhookUrl);
 
