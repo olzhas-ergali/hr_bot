@@ -1,17 +1,39 @@
 const { google } = require('googleapis');
 const TelegramBot = require('node-telegram-bot-api');
+const express = require('express');
 const fs = require('fs');
 const axios = require('axios');
-const express = require('express');
 
-const bot = new TelegramBot('6741457660:AAFaWvRJX0kj5UK2UggWWXdZBAO2eGC22nw', { polling: true });
+const app = express();
+app.use(express.json());
 
+const TOKEN = '7311671854:AAGU0ULdZ8zldqzLvEEX5hWxuqvlRj72NPU';
+const bot = new TelegramBot(TOKEN, { webHook: true });
+
+const webhookUrl = 'https://your-vercel-deploy-url.vercel.app/api/telegram-bot';
+
+// Установка нового вебхука
+bot.setWebHook(webhookUrl).then(() => {
+  console.log(`Webhook установлен на ${webhookUrl}`);
+}).catch(err => {
+  console.error('Ошибка при установке webhook:', err);
+});
+
+app.post('/api/telegram-bot', (req, res) => {
+  bot.processUpdate(req.body);
+  res.sendStatus(200);
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Сервер запущен на порту ${PORT}`);
+});
 
 let users = {};
 
 const greetings = {
-  en: "Привет!\nСпасибо за интерес к вакансии Продавца-консультанта в Qazaq Republic!\n\nДавай расскажу немного о вакансии:\n\nЧто мы ожидаем с кандидата?\n- Знание казахского и русского;\n- Возраст – от 18 лет;\n- Внимание к деталям, пунктуальность, ответственность, стрессоустойчивость, эффективность, лояльность к компании, работа с клиентами и работа в команде.\n\nЧто нужно будет делать?\n- Работа с клиентами;\n- Обслуживание на кассе;\n- Работа на складе.\n\nКакие условия мы предлагаем?\n- Профессиональное развитие (обучение, тренинги, корпоративная библиотека);\n- Карьерный рост;\n- Официальное трудоустройство, отпуск 24 календарных дня;\n- Комфортное рабочее пространство и дружелюбный коллектив;\n- Ежемесячные тимбилдинги с командой;\n- Снэки и скидки для сотрудников;\n- Зарплату в размере 180 000 – 190 000 тенге в месяц (после вычета налогов).\n\nИнтересно?)\n\nОтветь ниже на несколько вопросов, чтобы мы смогли получше узнать тебя…",
-  kz: "Cәлем!\nQazaq Republic-те сатушы-кеңесші бос орынға қызығушылық танытқаның үшін рахмет!\n\nЖұмыс туралы қысқаша айтып берейін:\n\nҮміткерден не күтеміз?\n- Қазақ және орыс тілдерін білу;\n- 18 жастан асқан;\n- Егжей-тегжейге назар аудару, ұқыптылық, жауапкершілік, стресске төзімділік, тиімділік, компанияға адалдық, клиенттермен жұмыс және командамен жұмыс істеу қабілеті бар.\n\nНе істеу керек?\n- Клиенттермен жұмыс;\n- Кассада қызмет көрсету;\n- Қоймадағы жұмыс.\n\nБіз қандай шарттарды ұсынамыз?\n- Кәсіби даму (оқыту, тренингтер, корпоративтік кітапхана);\n- Мансаптық өсу;\n- Ресми жұмысқа орналасу, 24 күнтізбелік демалыс күндері;\n- Ыңғайлы жұмыс кеңістігі және достық ұжым;\n- Командамен ай сайынғы тимбилдинг;\n- Қызметкерлерге арналған снэктер мен жеңілдіктер;\n- Жалақы мөлшерінде 180 000 – 190 000 айына теңге (салықтарды шегергеннен кейін).\n\nҚызық па?)\n\nСенімен жақынырақ танысу үшін төмендегі бірнеше сұрақтарға жауап бер…"
+  en: "Привет!\nСпасибо за интерес к вакансии Продавца-консультанта в Qazaq Republic!\n\n...",
+  kz: "Cәлем!\nQazaq Republic-те сатушы-кеңесші бос орынға қызығушылық танытқаның үшін рахмет!\n\n..."
 };
 
 const questions = [
@@ -120,7 +142,7 @@ async function saveToGoogleSheets(answers) {
   try {
     const getRows = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: 'Sheet1!A:A'
+      range: 'Sheet1!A:F'
     });
 
     const numRows = getRows.data.values ? getRows.data.values.length : 0;
@@ -149,21 +171,3 @@ async function saveToGoogleSheets(answers) {
     console.error('Ошибка при сохранении в Google Sheets:', error);
   }
 }
-
-const app = express();
-const port = process.env.PORT || 3000;
-
-app.use(express.json());
-
-const webhookUrl = 'https://hr-bot-five.vercel.app/api/telegram-bot';
-
-bot.setWebHook(webhookUrl);
-
-app.post('/api/telegram-bot', (req, res) => {
-  bot.processUpdate(req.body);
-  res.sendStatus(200);
-});
-
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
